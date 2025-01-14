@@ -1,91 +1,47 @@
-# WhatsApp Message Monitor Bot
+# WhatsApp Bot Project
 
-A WhatsApp bot that monitors messages and provides notifications for important communications.
+This project is a WhatsApp bot built with Node.js and JavaScript, using `whatsapp-web.js` for WhatsApp integration and PostgreSQL for data storage. The bot handles WhatsApp messages efficiently, enriches them with historical context, and applies learning algorithms to improve its functionality over time.
 
-## Features
+## Services
 
-- Real-time message monitoring
-- Instant notifications for all incoming messages
-- Priority alerts for:
-  - Messages containing "urgent" or "important"
-  - Questions (messages ending with ? or containing question words)
-  - Emergency requests
-  - Help requests
-- Periodic message scanning (every 15 minutes)
-- Daily summary at midnight
-- Stealth mode operation (no automatic responses)
-- **Enhanced Message Handling**: Improved message processing with historical context enrichment and advanced learning analysis.
-- **Error Logging**: Detailed error logging for better troubleshooting and maintenance.
+### EnhancedLearningService
 
-## Setup
+The `EnhancedLearningService` class is responsible for analyzing messages, calculating response confidence, and learning user styles. It uses the `natural` library for tokenization and the `sentiment` library for sentiment analysis.
 
-### Prerequisites
-- Node.js
-- PostgreSQL database
-- WhatsApp account
+#### Methods
 
-### Installation
+- **analyzeMessage(messageData)**: Analyzes the content of a message, tokenizing it, performing sentiment analysis, extracting topics, and recognizing the intent. Returns an object containing the original message data along with the analysis results.
+
+- **extractTopics(tokens)**: Extracts topics from the message tokens based on word frequency. Returns the top 3 most frequent words as topics.
+
+- **recognizeIntent(content)**: Recognizes the intent of the message content. Returns 'question', 'request', 'gratitude', or 'statement' based on the content.
+
+- **calculateResponseConfidence(analysis)**: Calculates a confidence score for a response based on the sentiment and intent of the message analysis.
+
+- **learnUserStyle(messageData)**: Learns and stores user styles based on the message content, topics, and intent. This is a placeholder for the actual storage logic.
+
+## Getting Started
+
+To get started with this project, clone the repository and install the dependencies:
+
 ```bash
-# Install dependencies
+git clone https://github.com/your-repo/whatsapp-bot.git
+cd whatsapp-bot
 npm install
-
-# Configure environment variables
-cp .env.template .env
-# Edit .env with your settings:
-# - OWNER_NUMBER (your WhatsApp number with country code, e.g., 1234567890@c.us)
-# - Database credentials
-# - Scanning intervals
-
-# Start the bot
-node index.js
 ```
 
-## Configuration
+## Running the Bot
 
-### Environment Variables
-```env
-# Bot Configuration
-OWNER_NUMBER=your-number@c.us    # Your WhatsApp number
-DEBUG=true                       # Enable debug logging
+To run the bot, use the following command:
 
-# Database Configuration
-DB_USER=username
-DB_PASSWORD=password
-DB_HOST=localhost
-DB_NAME=database
-DB_PORT=5432
-
-# Scanning Intervals (in minutes)
-PERIODIC_SCAN_INTERVAL=15        # How often to scan for messages
-MIDNIGHT_SUMMARY_TIME=00:00      # When to send daily summary
+```bash
+npm start
 ```
 
-## Usage
+## Contributing
 
-1. Start the bot: `node index.js`
-2. Scan the QR code with WhatsApp
-3. The bot will notify you of:
-   - Every new message received
-   - Messages requiring attention (urgent/questions)
-   - Periodic scan summaries
-   - Daily activity summaries
+Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before getting started.
 
-## Troubleshooting
+## License
 
-### Common Issues
-- If QR code doesn't scan, delete `.wwebjs_auth/` and try again
-- For connection issues, ensure stable internet connection
-- Database errors: verify PostgreSQL is running and credentials are correct
-- **Error Handling**: Improved error logging in `MessageHandler.js` for better troubleshooting. Check logs for detailed error messages.
-
-### Error Recovery
-- The bot automatically attempts to reconnect on disconnection
-- Clear cache directories (.wwebjs_cache/, .wwebjs_auth/) for fresh start
-- Check logs (bot.log) for detailed error messages
-
-## Security Notes
-
-- Keep your .env file secure
-- Don't share QR codes or session data
-- Regularly update dependencies
-- Monitor logs for unauthorized access attempts
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
