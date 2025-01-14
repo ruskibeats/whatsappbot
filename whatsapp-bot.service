@@ -1,0 +1,85 @@
+[Unit]
+Description=WhatsApp Bot Service - Intelligent Bot with Sentiment Analysis
+After=network.target
+Wants=network-online.target
+Documentation=https://github.com/username/whatsapp-bot
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/whatsapp
+
+# Environment setup
+Environment=PUPPETEER_CACHE_DIR=/root/whatsapp/.cache
+Environment=WWEBJS_CACHE_DIR=/root/whatsapp/.wwebjs_auth
+Environment=DEBUG=whatsapp-web.js:*
+Environment=NODE_ENV=production
+EnvironmentFile=/root/whatsapp/.env
+
+# Ensure Node.js version compatibility
+ExecStartPre=/bin/bash -c 'node -v | grep -q "^v1[4-9]" || (echo "Node.js v14 or higher required" && exit 1)'
+
+# Clean up any existing instances before starting
+ExecStartPre=-/usr/bin/pkill -9 -f "node.*index.js"
+ExecStartPre=-/usr/bin/pkill -9 -f "node.*start.js"
+ExecStartPre=-/usr/bin/pkill -9 -f "chrome.*whatsapp"
+ExecStartPre=/bin/sleep 2
+
+# Ensure directories exist with proper permissions
+ExecStartPre=/bin/mkdir -p /root/whatsapp/data
+ExecStartPre=/bin/mkdir -p /root/whatsapp/.wwebjs_auth
+ExecStartPre=/bin/mkdir -p /root/whatsapp/.cache
+ExecStartPre=/bin/chown -R root:root /root/whatsapp/data /root/whatsapp/.wwebjs_auth /root/whatsapp/.cache
+ExecStartPre=/bin/chmod -R 750 /root/whatsapp/data /root/whatsapp/.wwebjs_auth /root/whatsapp/.cache
+
+# Start the bot
+ExecStart=/usr/bin/node /root/whatsapp/start.js
+
+# Restart configuration for persistent session
+Restart=always
+RestartSec=10
+
+# Use journald for logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=whatsapp-bot
+
+# Ensure directories persist
+StateDirectory=whatsapp
+RuntimeDirectory=whatsapp
+ConfigurationDirectory=whatsapp
+
+# Cleanup on stop (but preserve .wwebjs_auth for session persistence)
+ExecStop=/usr/bin/pkill -f "node.*index.js"
+ExecStop=/usr/bin/pkill -f "node.*start.js"
+ExecStop=/usr/bin/pkill -f "chrome.*whatsapp"
+
+# Kill mode settings
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Resource limits
+MemoryMax=2G
+CPUQuota=200%
+TasksMax=100
+LimitNOFILE=65535
+
+# Security settings (modified to allow .wwebjs_auth persistence)
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+ReadWritePaths=/root/whatsapp/.wwebjs_auth /root/whatsapp/data /root/whatsapp/bot.log
+
+# Allow network access
+IPAddressAllow=any
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

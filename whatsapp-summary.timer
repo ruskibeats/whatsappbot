@@ -1,0 +1,16 @@
+[Unit]
+Description=Timer for WhatsApp Summary Service
+Requires=whatsapp-summary.service
+
+[Timer]
+# Run every hour
+OnCalendar=hourly
+# Add randomized delay to prevent exact-hour execution
+RandomizedDelaySec=300
+# Keep persistent timestamp of last execution
+Persistent=true
+# Run immediately if last run was missed
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

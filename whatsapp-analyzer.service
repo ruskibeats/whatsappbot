@@ -1,0 +1,27 @@
+[Unit]
+Description=WhatsApp Analysis Bot
+After=network.target postgresql.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/whatsapp
+# Cleanup processes and logs
+ExecStartPre=-/usr/bin/pkill -f "node.*whatsapp"
+ExecStartPre=/bin/rm -f /root/whatsapp/bot.pid
+ExecStartPre=/bin/sh -c 'tail -n 50 /root/whatsapp/bot.log > /root/whatsapp/bot.log.tmp && mv /root/whatsapp/bot.log.tmp /root/whatsapp/bot.log'
+ExecStartPre=/bin/sh -c 'tail -n 50 /root/whatsapp/bot.error.log > /root/whatsapp/bot.error.log.tmp && mv /root/whatsapp/bot.error.log.tmp /root/whatsapp/bot.error.log'
+ExecStart=/usr/bin/node index.js
+Restart=always
+RestartSec=10
+StandardOutput=append:/root/whatsapp/bot.log
+StandardError=append:/root/whatsapp/bot.error.log
+Environment=NODE_ENV=production
+
+# Restart policy
+StartLimitBurst=0
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,0 +1,51 @@
+# Basic Commands
+!help
+# Shows all available commands and their descriptions
+
+!ping
+# Simple connectivity test - should reply with "pong"
+
+!time
+# Shows current server time
+
+!info
+# Shows chat information including name and participant count
+
+!status
+# Shows your relationship status with the bot
+
+!bio
+# Shows your stored biography
+
+# AI Commands
+!ai Hello, how are you?
+# Gets an AI-generated response to your message
+
+# Analysis Commands
+!analyze
+# Shows detailed analysis of your chat patterns and style
+
+!contact
+# Shows your complete contact profile
+
+!search hello
+# Searches chat history for messages containing "hello"
+
+!export
+# Shows your data in text format
+
+!export json
+# Shows your data in JSON format
+
+!relationships
+# Shows detailed relationship analysis
+
+# Test some error cases
+!search
+# Should ask for a search query
+
+!ai
+# Should ask for a message to respond to
+
+!unknown
+# Should show "Unknown command" message 

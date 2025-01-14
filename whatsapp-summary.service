@@ -1,0 +1,29 @@
+[Unit]
+Description=WhatsApp Summary Service
+After=whatsapp-bot.service
+Requires=whatsapp-bot.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/whatsapp
+Environment=NODE_ENV=production
+EnvironmentFile=/root/whatsapp/.env
+
+# Execute summary generation
+ExecStart=/usr/bin/node /root/whatsapp/src/tools/generate-summary.js
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+ReadWritePaths=/root/whatsapp/data
+
+[Install]
+WantedBy=multi-user.target

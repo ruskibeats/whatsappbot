@@ -1,0 +1,27 @@
+{
+  "parameters": {
+    "method": "POST",
+    "url": "http://localhost:3000/api/message",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "bodyParameters": {
+      "body": {
+        "to": "={{$json.phoneNumber}}@c.us",
+        "message": "={{$json.messageText}}"
+      }
+    }
+  },
+  "name": "Send WhatsApp Message",
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 3,
+  "position": [820, 300],
+  "continueOnFail": false
+}
