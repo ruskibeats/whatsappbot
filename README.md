@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # WhatsApp Message Monitor Bot
 
 A WhatsApp bot that monitors messages and provides notifications for important communications.
@@ -15,6 +14,8 @@ A WhatsApp bot that monitors messages and provides notifications for important c
 - Periodic message scanning (every 15 minutes)
 - Daily summary at midnight
 - Stealth mode operation (no automatic responses)
+- **Enhanced Message Handling**: Improved message processing with historical context enrichment and advanced learning analysis.
+- **Error Logging**: Detailed error logging for better troubleshooting and maintenance.
 
 ## Setup
 
@@ -75,6 +76,7 @@ MIDNIGHT_SUMMARY_TIME=00:00      # When to send daily summary
 - If QR code doesn't scan, delete `.wwebjs_auth/` and try again
 - For connection issues, ensure stable internet connection
 - Database errors: verify PostgreSQL is running and credentials are correct
+- **Error Handling**: Improved error logging in `MessageHandler.js` for better troubleshooting. Check logs for detailed error messages.
 
 ### Error Recovery
 - The bot automatically attempts to reconnect on disconnection
@@ -87,6 +89,3 @@ MIDNIGHT_SUMMARY_TIME=00:00      # When to send daily summary
 - Don't share QR codes or session data
 - Regularly update dependencies
 - Monitor logs for unauthorized access attempts
-=======
-# whatsappbot
->>>>>>> 18cd9a8d6a7987d5c996d339dcdd4c5ef1ecd3d2
