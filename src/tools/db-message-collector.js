@@ -25,7 +25,7 @@ class DatabaseMessageCollector {
             testClient.release();
             console.log('Database connection successful');
 
-            console.log('Initializing WhatsApp client...');
+            console.log('Initializing WhatsApp client with auth path:', '.wwebjs_auth');
             // Initialize WhatsApp client
             this.client = new Client({
                 authStrategy: new LocalAuth({
@@ -53,28 +53,28 @@ class DatabaseMessageCollector {
 
             console.log('Setting up event handlers...');
             this.client.on('qr', (qr) => {
-                console.log('QR Code received:');
+                console.log('QR Code received, please scan with WhatsApp:');
                 qrcode.generate(qr, { small: true });
             });
 
             this.client.on('loading_screen', (percent, message) => {
-                console.log('Loading:', percent, '%', message || '');
+                console.log('Loading WhatsApp:', percent, '%', message || '');
             });
 
             this.client.on('authenticated', () => {
-                console.log('WhatsApp client authenticated');
+                console.log('WhatsApp client authenticated successfully');
             });
 
             this.client.on('auth_failure', (msg) => {
-                console.error('Authentication failed:', msg);
+                console.error('WhatsApp authentication failed:', msg);
                 process.exit(1);
             });
 
             this.client.on('ready', async () => {
-                console.log('WhatsApp client ready');
+                console.log('WhatsApp client ready, starting message collection...');
                 try {
                     await this.collectMessages();
-                    console.log('Message collection completed');
+                    console.log('Message collection completed successfully');
                     process.exit(0);
                 } catch (error) {
                     console.error('Error collecting messages:', error);
@@ -82,12 +82,12 @@ class DatabaseMessageCollector {
                 }
             });
 
-            console.log('Starting client initialization...');
+            console.log('Starting WhatsApp client initialization...');
             await this.client.initialize();
-            console.log('WhatsApp client initialized');
+            console.log('WhatsApp client initialized successfully');
 
         } catch (error) {
-            console.error('Fatal error:', error);
+            console.error('Fatal error during startup:', error);
             process.exit(1);
         }
     }
@@ -239,6 +239,14 @@ class DatabaseMessageCollector {
 
                     // Store messages
                     for (const msg of messages) {
+                        // Skip system messages and phone numbers
+                        if (!msg.body || msg.body.includes('@c.us') || msg.body.trim().length === 0) {
+                            console.log(`Skipping message: ${msg.body || 'empty'}`);
+                            continue;
+                        }
+
+                        console.log(`Processing message: "${msg.body.substring(0, 50)}..."`);
+                        
                         // Store basic message data
                         await dbClient.query(
                             'INSERT INTO messages (message_id, chat_id, timestamp, sender, message_text, is_from_me, has_media, media_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (message_id) DO NOTHING',
@@ -274,7 +282,17 @@ class DatabaseMessageCollector {
                         `INSERT INTO chat_analytics 
                         (chat_id, timestamp, message_count, active_participants, last_activity, 
                         daily_messages_avg, response_rate, response_time_avg, peak_hours, quiet_hours)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                        ON CONFLICT (chat_id) DO UPDATE SET
+                        timestamp = EXCLUDED.timestamp,
+                        message_count = EXCLUDED.message_count,
+                        active_participants = EXCLUDED.active_participants,
+                        last_activity = EXCLUDED.last_activity,
+                        daily_messages_avg = EXCLUDED.daily_messages_avg,
+                        response_rate = EXCLUDED.response_rate,
+                        response_time_avg = EXCLUDED.response_time_avg,
+                        peak_hours = EXCLUDED.peak_hours,
+                        quiet_hours = EXCLUDED.quiet_hours`,
                         [
                             chat.id._serialized,
                             new Date(),
@@ -284,8 +302,8 @@ class DatabaseMessageCollector {
                             analytics.dailyMessagesAvg,
                             analytics.responseRate,
                             analytics.responseTimeAvg,
-                            JSON.stringify({"peak": ["10:00", "15:00"]}),  // Properly formatted JSON for peak hours
-                            JSON.stringify({"quiet": ["23:00", "04:00"]})   // Properly formatted JSON for quiet hours
+                            JSON.stringify({"peak": ["10:00", "15:00"]}),
+                            JSON.stringify({"quiet": ["23:00", "04:00"]})
                         ]
                     );
 
@@ -424,9 +442,4 @@ class DatabaseMessageCollector {
     }
 }
 
-// Create and start the collector
-const collector = new DatabaseMessageCollector();
-collector.start().catch(error => {
-    console.error('Error starting collector:', error);
-    process.exit(1);
-}); 
+module.exports = DatabaseMessageCollector; 

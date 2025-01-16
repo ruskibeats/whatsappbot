@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS messages (
 -- Enhanced sentiment analysis table
 CREATE TABLE IF NOT EXISTS sentiment_analysis (
     id SERIAL PRIMARY KEY,
-    message_id VARCHAR(255) REFERENCES messages(message_id),
+    message_id VARCHAR(255) REFERENCES messages(message_id) UNIQUE,
     chat_id VARCHAR(255) REFERENCES chats(chat_id),
     timestamp TIMESTAMP,
     positive_score FLOAT,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS sentiment_analysis (
 -- Emotional analysis table
 CREATE TABLE IF NOT EXISTS emotional_analysis (
     id SERIAL PRIMARY KEY,
-    message_id VARCHAR(255) REFERENCES messages(message_id),
+    message_id VARCHAR(255) REFERENCES messages(message_id) UNIQUE,
     chat_id VARCHAR(255) REFERENCES chats(chat_id),
     timestamp TIMESTAMP,
     dominant_emotion VARCHAR(50),

@@ -1,0 +1,1 @@
+const DatabaseMessageCollector = require("./db-message-collector"); const collector = new DatabaseMessageCollector(); collector.start().catch(error => { console.error("Error starting collector:", error); process.exit(1); });
