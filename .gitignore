@@ -3,38 +3,27 @@ node_modules/
 
 # Environment variables
 .env
-.env.local
 
-# Build outputs
-dist/
-build/
+# WhatsApp Web.js files
+.wwebjs_auth/
+.wwebjs_cache/
 
 # Logs
 *.log
-npm-debug.log*
 
-# IDE specific files
-.idea/
-.vscode/
+# Temporary files
+*~
 *.swp
 *.swo
 
-# Operating System files
+# Database dumps and temporary SQL files
+*.sql.tmp
+*.dump
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
 .DS_Store
 Thumbs.db
-
-# WhatsApp Web JS auth files
-.wwebjs_auth/
-
-# Large files
-*.mp4
-*.mp3
-*.wav
-*.zip
-*.rar
-*.7z
-*.tar
-*.gz
-*.iso
-
-# Add any specific large files/folders we find
