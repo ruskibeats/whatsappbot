@@ -1,47 +1,88 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const { Pool } = require('pg');
 const qrcode = require('qrcode-terminal');
+require('dotenv').config();
 
 class DatabaseMessageCollector {
     constructor() {
         this.client = null;
         this.pool = new Pool({
-            user: 'russbee',
-            password: 'skimmer69',
-            host: 'localhost',
-            database: 'beehive',
-            port: 5432
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            host: process.env.DB_HOST,
+            database: process.env.DB_NAME,
+            port: process.env.DB_PORT
         });
     }
 
     async start() {
         try {
+            console.log('Starting collector...');
+            
             // Test database connection first
             const testClient = await this.pool.connect();
             await testClient.query('SELECT NOW()');
             testClient.release();
             console.log('Database connection successful');
 
+            console.log('Initializing WhatsApp client...');
             // Initialize WhatsApp client
             this.client = new Client({
-                authStrategy: new LocalAuth({ dataPath: '.wwebjs_auth' }),
+                authStrategy: new LocalAuth({
+                    clientId: "whatsapp-analyzer",
+                    dataPath: '.wwebjs_auth'
+                }),
                 puppeteer: {
-                    headless: true,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                    headless: 'new',
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu',
+                        '--no-first-run',
+                        '--no-default-browser-check',
+                        '--disable-notifications'
+                    ],
+                    executablePath: '/usr/bin/chromium',
+                    defaultViewport: {
+                        width: 1280,
+                        height: 720
+                    }
                 }
             });
 
+            console.log('Setting up event handlers...');
             this.client.on('qr', (qr) => {
                 console.log('QR Code received:');
                 qrcode.generate(qr, { small: true });
             });
 
-            this.client.on('ready', async () => {
-                console.log('WhatsApp client ready');
-                await this.collectMessages();
-                process.exit(0);
+            this.client.on('loading_screen', (percent, message) => {
+                console.log('Loading:', percent, '%', message || '');
             });
 
+            this.client.on('authenticated', () => {
+                console.log('WhatsApp client authenticated');
+            });
+
+            this.client.on('auth_failure', (msg) => {
+                console.error('Authentication failed:', msg);
+                process.exit(1);
+            });
+
+            this.client.on('ready', async () => {
+                console.log('WhatsApp client ready');
+                try {
+                    await this.collectMessages();
+                    console.log('Message collection completed');
+                    process.exit(0);
+                } catch (error) {
+                    console.error('Error collecting messages:', error);
+                    process.exit(1);
+                }
+            });
+
+            console.log('Starting client initialization...');
             await this.client.initialize();
             console.log('WhatsApp client initialized');
 
@@ -158,6 +199,15 @@ class DatabaseMessageCollector {
                 try {
                     console.log(`Processing chat: ${chat.name}`);
                     
+                    // First create/update the chat record
+                    await dbClient.query(
+                        `INSERT INTO chats (chat_id, chat_name, created_at, updated_at)
+                         VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                         ON CONFLICT (chat_id) 
+                         DO UPDATE SET chat_name = EXCLUDED.chat_name, updated_at = CURRENT_TIMESTAMP`,
+                        [chat.id._serialized, chat.name || '']
+                    );
+                    
                     // Store chat metadata
                     await dbClient.query(
                         `INSERT INTO chat_metadata 
@@ -191,7 +241,7 @@ class DatabaseMessageCollector {
                     for (const msg of messages) {
                         // Store basic message data
                         await dbClient.query(
-                            'INSERT INTO messages (message_id, chat_id, timestamp, sender_id, message_body, is_from_me, has_media, media_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (message_id) DO NOTHING',
+                            'INSERT INTO messages (message_id, chat_id, timestamp, sender, message_text, is_from_me, has_media, media_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (message_id) DO NOTHING',
                             [
                                 msg.id._serialized,
                                 chat.id._serialized,
@@ -234,8 +284,8 @@ class DatabaseMessageCollector {
                             analytics.dailyMessagesAvg,
                             analytics.responseRate,
                             analytics.responseTimeAvg,
-                            ['10:00', '15:00'],  // Default peak hours
-                            ['23:00', '04:00']   // Default quiet hours
+                            JSON.stringify({"peak": ["10:00", "15:00"]}),  // Properly formatted JSON for peak hours
+                            JSON.stringify({"quiet": ["23:00", "04:00"]})   // Properly formatted JSON for quiet hours
                         ]
                     );
 
@@ -374,9 +424,9 @@ class DatabaseMessageCollector {
     }
 }
 
-// Start collector
+// Create and start the collector
 const collector = new DatabaseMessageCollector();
 collector.start().catch(error => {
-    console.error('Fatal error:', error);
+    console.error('Error starting collector:', error);
     process.exit(1);
 }); 
