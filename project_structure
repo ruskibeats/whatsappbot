@@ -1,0 +1,15 @@
+elevenlabs_project/
+├── src/
+│   ├── __init__.py
+│   ├── text_to_speech.py
+│   └── utils/
+│       ├── __init__.py
+│       └── audio_utils.py
+├── examples/
+│   ├── __init__.py
+│   └── basic_usage.py
+├── tests/
+│   ├── __init__.py
+│   └── test_tts.py
+├── requirements.txt
+└── README.md 

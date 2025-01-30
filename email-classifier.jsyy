@@ -1,0 +1,89 @@
+const natural = require('natural');
+const sentiment = require('sentiment');
+const keywordExtractor = require('keyword-extractor');
+
+async function classifyEmail(subject, body) {
+    try {
+        const fullText = `${subject} ${body}`;
+
+        // Initialize tools
+        const tokenizer = new natural.WordTokenizer();
+        const classifier = new natural.BayesClassifier();
+        const sentimentAnalyzer = new sentiment();
+
+        // Define balanced training data
+        const trainingData = [
+            { text: "urgent critical immediate attention required", category: "URGENT" },
+            { text: "server down emergency alert", category: "URGENT" },
+            { text: "deadline action required", category: "URGENT" },
+            { text: "special offer discount sale limited time", category: "MARKETING" },
+            { text: "promotion coupon expires today", category: "MARKETING" },
+            { text: "newsletter monthly update subscription", category: "NEWSLETTER" },
+            { text: "weekly digest news updates", category: "NEWSLETTER" },
+            { text: "invoice payment due receipt", category: "FINANCE" },
+            { text: "transaction statement balance", category: "FINANCE" },
+            { text: "meeting schedule appointment", category: "MEETING" },
+            { text: "conference call invitation", category: "MEETING" },
+
+            // Additional data to improve balance
+            { text: "new features announced in our monthly newsletter", category: "NEWSLETTER" },
+            { text: "we have scheduled a meeting for the project update", category: "MEETING" },
+            { text: "please find your transaction details attached", category: "FINANCE" },
+            { text: "limited time only: save 50% on your next purchase", category: "MARKETING" },
+            { text: "critical update required for software patching", category: "URGENT" }
+        ];
+
+        // Train the classifier
+        trainingData.forEach(item => {
+            classifier.addDocument(item.text, item.category);
+        });
+        classifier.train();
+
+        // Analyze text
+        const tokens = tokenizer.tokenize(fullText);
+        const sentimentResult = sentimentAnalyzer.analyze(fullText);
+        const keywords = keywordExtractor.extract(fullText, {
+            language: "english",
+            remove_digits: true,
+            return_changed_case: true,
+            remove_duplicates: true
+        });
+
+        // Classify the text
+        const classifications = classifier.getClassifications(fullText);
+        const topClassification = classifications[0];
+
+        // Determine the confidence gap
+        const confidenceGap =
+            classifications.length > 1
+                ? Math.abs(topClassification.value - classifications[1].value)
+                : 1;
+
+        // Handle ambiguous cases
+        const isAmbiguous = confidenceGap < 0.15; // Adjust threshold for ambiguity
+
+        // Determine importance
+        const isUrgent = /urgent|immediate|asap|critical|emergency/i.test(fullText);
+
+        // Prepare the result
+        const result = {
+            category: isAmbiguous ? "UNCERTAIN" : topClassification.label,
+            importance: isUrgent ? "high" : "low",
+            confidence: Math.round(topClassification.value * 100),
+            isAmbiguous,
+            sentiment: sentimentResult.score,
+            keywords: keywords.slice(0, 5), // Limit to top 5 keywords
+            tokens: tokens.length,
+            classifications: classifications.slice(0, 3) // Top 3 categories for debugging
+        };
+
+        return result;
+    } catch (error) {
+        return { error: error.message, importance: "high", category: "ERROR" };
+    }
+}
+
+// Example Usage
+const subject = "Monthly Newsletter: Updates and Features!";
+const body = "Check out the latest features we've added to your product in this newsletter.";
+classifyEmail(subject, body).then(result => console.log(result));
