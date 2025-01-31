@@ -1,40 +1,20 @@
 {
-  "name": "ssml-tool",
-  "version": "1.0.0",
-  "description": "SSML generation and manipulation tool",
-  "tool_type": "text_generation",
-  "input_schema": {
-    "type": "object",
-    "properties": {
-      "text": {
-        "type": "string",
-        "description": "Raw text to convert to SSML"
-      },
-      "style": {
-        "type": "string",
-        "enum": ["neutral", "news", "excited", "sad"],
-        "description": "Speaking style to apply"
-      },
-      "platform": {
-        "type": "string",
-        "enum": ["elevenlabs", "aws-polly", "google-tts"],
-        "description": "Target platform for SSML"
-      }
+    "name": "SSML_Generator",
+    "description": "A tool for generating SSML markup for text-to-speech applications",
+    "version": "1.0.0",
+    "input_parameters": {
+        "text": "Text content to convert to SSML",
+        "emotion": "Optional emotional style (happy, sad, excited, etc.)",
+        "rate": "Optional speech rate (slow, medium, fast)",
+        "pitch": "Optional pitch adjustment",
+        "volume": "Optional volume level"
     },
-    "required": ["text"]
-  },
-  "output_schema": {
-    "type": "object",
-    "properties": {
-      "ssml": {
-        "type": "string",
-        "description": "Generated SSML markup"
-      }
-    }
-  },
-  "reference_paths": {
-    "patterns": "/templates/patterns",
-    "examples": "/examples",
-    "platforms": "/examples/platforms"
-  }
+    "quick_templates": {
+        "basic": "<speak>${text}</speak>",
+        "emotional": "<speak><amazon:emotion name='${emotion}'>${text}</amazon:emotion></speak>",
+        "advanced": "<speak><prosody rate='${rate}' pitch='${pitch}'><amazon:emotion name='${emotion}'>${text}</amazon:emotion></prosody></speak>"
+    },
+    "common_emotions": ["happy", "sad", "excited", "serious"],
+    "common_rates": ["slow", "medium", "fast"],
+    "common_volumes": ["soft", "medium", "loud"]
 }
