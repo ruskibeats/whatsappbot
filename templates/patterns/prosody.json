@@ -1,0 +1,14 @@
+{
+  "prosody": {
+    "rate": {
+      "template": "<prosody rate=\"{value}\">",
+      "values": ["x-slow", "slow", "medium", "fast", "x-fast", "{percentage}%"],
+      "default_value": "medium"
+    },
+    "pitch": {
+      "template": "<prosody pitch=\"{value}\">",
+      "values": ["x-low", "low", "medium", "high", "x-high", "{semitones}st"],
+      "default_value": "medium"
+    }
+  }
+}

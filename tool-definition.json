@@ -1,6 +1,40 @@
 {
-  "name": "ssml-guide",
+  "name": "ssml-tool",
   "version": "1.0.0",
-  "description": "SSML specification and examples",
-  "supported_platforms": ["elevenlabs", "aws-polly", "google-tts"]
+  "description": "SSML generation and manipulation tool",
+  "tool_type": "text_generation",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Raw text to convert to SSML"
+      },
+      "style": {
+        "type": "string",
+        "enum": ["neutral", "news", "excited", "sad"],
+        "description": "Speaking style to apply"
+      },
+      "platform": {
+        "type": "string",
+        "enum": ["elevenlabs", "aws-polly", "google-tts"],
+        "description": "Target platform for SSML"
+      }
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "ssml": {
+        "type": "string",
+        "description": "Generated SSML markup"
+      }
+    }
+  },
+  "reference_paths": {
+    "patterns": "/templates/patterns",
+    "examples": "/examples",
+    "platforms": "/examples/platforms"
+  }
 }

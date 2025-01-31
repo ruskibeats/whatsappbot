@@ -1,0 +1,10 @@
+{
+  "platform": "elevenlabs",
+  "examples": [
+    {
+      "description": "Basic emotion",
+      "input": "Hello world",
+      "output": "<speak><amazon:emotion name=\"happy\" intensity=\"medium\">Hello world</amazon:emotion></speak>"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "emotions": {
+    "happy": {
+      "template": "<amazon:emotion name=\"happy\" intensity=\"{intensity}\">",
+      "intensities": ["low", "medium", "high"],
+      "default_intensity": "medium"
+    },
+    "excited": {
+      "template": "<amazon:emotion name=\"excited\" intensity=\"{intensity}\">",
+      "intensities": ["low", "medium", "high"],
+      "default_intensity": "high"
+    }
+  }
+}
