@@ -1,0 +1,6 @@
+{
+  "name": "ssml-guide",
+  "version": "1.0.0",
+  "description": "SSML specification and examples",
+  "supported_platforms": ["elevenlabs", "aws-polly", "google-tts"]
+}
