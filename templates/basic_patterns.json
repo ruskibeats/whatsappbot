@@ -1,0 +1,15 @@
+{
+  "patterns": {
+    "excited": {
+      "prefix": "<amazon:emotion name=\"excited\" intensity=\"high\">",
+      "suffix": "</amazon:emotion>"
+    },
+    "news": {
+      "prefix": "<amazon:domain name=\"news\">",
+      "suffix": "</amazon:domain>"
+    },
+    "pause": {
+      "template": "<break time=\"{duration}s\"/>"
+    }
+  }
+}
