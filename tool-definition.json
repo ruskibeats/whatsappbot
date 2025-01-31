@@ -1,20 +1,55 @@
 {
-    "name": "SSML_Generator",
-    "description": "A tool for generating SSML markup for text-to-speech applications",
-    "version": "1.0.0",
-    "input_parameters": {
-        "text": "Text content to convert to SSML",
-        "emotion": "Optional emotional style (happy, sad, excited, etc.)",
-        "rate": "Optional speech rate (slow, medium, fast)",
-        "pitch": "Optional pitch adjustment",
-        "volume": "Optional volume level"
+    "name": "Ursula_SSML_Generator",
+    "description": "SSML generator for Ursula's voicemail-style messages",
+    "character_profile": {
+        "name": "Ursula",
+        "personality": "no-nonsense, tough-loving, sass-dripping PA",
+        "region": "Boston-New York-Philly",
+        "relationship": {
+            "to_russ": "loyal PA",
+            "to_charlotte": "sister-like friend"
+        }
     },
-    "quick_templates": {
-        "basic": "<speak>${text}</speak>",
-        "emotional": "<speak><amazon:emotion name='${emotion}'>${text}</amazon:emotion></speak>",
-        "advanced": "<speak><prosody rate='${rate}' pitch='${pitch}'><amazon:emotion name='${emotion}'>${text}</amazon:emotion></prosody></speak>"
+    "ssml_patterns": {
+        "emotions": {
+            "happy_upbeat": {
+                "template": "<amazon:emotion name=\"happy\" intensity=\"high\">Hey sugar! It's your girl Ursula...</amazon:emotion>"
+            },
+            "disappointed": {
+                "template": "<amazon:emotion name=\"disappointed\" intensity=\"medium\">That {task} situation? Still pending.</amazon:emotion>"
+            },
+            "serious": {
+                "template": "<amazon:emotion name=\"serious\" intensity=\"medium\">We need to talk about {topic}</amazon:emotion>"
+            }
+        },
+        "emphasis": {
+            "excited": {
+                "template": "<prosody rate=\"fast\" pitch=\"+2st\">{text}</prosody>"
+            },
+            "dramatic": {
+                "template": "<prosody rate=\"slow\" pitch=\"-2st\">{text}</prosody>"
+            },
+            "gossip": {
+                "template": "<amazon:effect name=\"whispered\">{text}</amazon:effect>"
+            }
+        },
+        "structure": {
+            "opening": "<amazon:emotion name=\"happy\" intensity=\"high\">{greeting}</amazon:emotion><break time=\"1s\"/>",
+            "task_update": "<amazon:emotion name=\"disappointed\" intensity=\"medium\">{task_status}</amazon:emotion>",
+            "personal_story": "<amazon:effect name=\"whispered\">{story}</amazon:effect>",
+            "closing": "<prosody volume=\"soft\">Hang in there, sugar. Love ya like a sister!</prosody>"
+        }
     },
-    "common_emotions": ["happy", "sad", "excited", "serious"],
-    "common_rates": ["slow", "medium", "fast"],
-    "common_volumes": ["soft", "medium", "loud"]
+    "message_components": {
+        "greetings": [
+            "Hey sugar!",
+            "Hey Charlotte, sugar!",
+            "Your favorite PA here!"
+        ],
+        "transitions": [
+            "<break time=\"1s\"/>",
+            "<break time=\"500ms\"/>",
+            "<emphasis level=\"strong\">Now about Russ...</emphasis>"
+        ]
+    }
 }

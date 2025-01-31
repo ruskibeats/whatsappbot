@@ -1,0 +1,11 @@
+{
+    "template_name": "daily_update",
+    "structure": "<speak>\n{opening}\n{task_updates}\n{personal_story}\n{russ_instructions}\n{closing}\n</speak>",
+    "components": {
+        "opening": "<amazon:emotion name=\"happy\" intensity=\"high\">Hey Charlotte, sugar! Your favorite PA here!</amazon:emotion>",
+        "task_updates": "<amazon:emotion name=\"disappointed\" intensity=\"medium\">{task_list}</amazon:emotion>",
+        "personal_story": "<amazon:effect name=\"whispered\">But girl, let me tell you about {story_topic}...</amazon:effect>",
+        "russ_instructions": "<emphasis level=\"strong\">Now about those tasks, Russ...</emphasis>",
+        "closing": "<prosody volume=\"soft\">Hang in there, sugar. Love ya like a sister!</prosody>"
+    }
+}
