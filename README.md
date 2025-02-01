@@ -11,7 +11,7 @@ A Node.js script for n8n that processes tasks and applies SSML (Speech Synthesis
   - Task type (Financial, Medical, Vehicle, Admin, etc.)
   - Task content
 - Provides task statistics and categorization
-- Formats output with detailed task information
+- Outputs clean, structured JSON format
 
 ## Input Requirements
 
@@ -35,26 +35,42 @@ Predefined SSML patterns are applied based on task context:
 
 ## Output Format
 
-The script outputs a structured format:
+The script outputs a structured JSON format:
+```json
+{
+    "stats": {
+        "total": 12,
+        "urgent": 12,
+        "regular": 0
+    },
+    "tasks": [
+        {
+            "title": "Task title",
+            "pattern": "<amazon:emotion name='disappointed' intensity='medium'>Task title</amazon:emotion>",
+            "due": "DD/MM/YYYY (X days overdue/remaining)",
+            "status": "Overdue|Critical|High Priority|Medium Priority|Low Priority",
+            "type": "General|Financial|Vehicle|Medical|Home|Admin",
+            "details": [
+                "Additional detail 1",
+                "Additional detail 2"
+            ]
+        }
+    ]
+}
 ```
-Total Tasks: X
-Urgent Tasks: Y
-Regular Tasks: Z
 
-🚨 URGENT TASKS:
-
-Task: [Task Content]
-Pattern: [Applied SSML Pattern]
-Due: DD/MM/YYYY (X days overdue/remaining)
-Status: [Overdue/Critical/High Priority/Medium Priority/Low Priority]
-Type: [Task Type]
-Details:
-- [Additional task details if present]
-
----
-
-[Additional tasks...]
-```
+### Output Fields
+- **stats**: Summary statistics of tasks
+  - `total`: Total number of tasks
+  - `urgent`: Number of urgent tasks
+  - `regular`: Number of regular tasks
+- **tasks**: Array of task objects
+  - `title`: Main task description
+  - `pattern`: SSML pattern applied to the task
+  - `due`: Due date with relative time
+  - `status`: Task priority status
+  - `type`: Categorized task type
+  - `details`: Array of additional task details
 
 ## Task Processing Logic
 
@@ -86,11 +102,21 @@ Based on content keywords:
 3. Connect the following inputs:
    - Tasks from a node named "Filter_Outstanding_Tasks"
    - SSML patterns from a node named "SSML_Patterns"
-4. The output will contain processed tasks with SSML patterns and statistics
+4. The output will contain processed tasks with SSML patterns and statistics in JSON format
 
 ## Error Handling
 
-- Returns empty stats if no tasks are present
+- Returns empty stats if no tasks are present:
+```json
+{
+    "stats": {
+        "total": 0,
+        "urgent": 0,
+        "regular": 0
+    },
+    "tasks": []
+}
+```
 - Filters out invalid tasks (missing content or due date)
 - Handles missing task details gracefully
 
