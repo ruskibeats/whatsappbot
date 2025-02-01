@@ -57,7 +57,7 @@ const processedTasks = tasks
         const daysUntilDue = Math.ceil((dueDateObj - today) / (1000 * 60 * 60 * 24));
         
         const contentLines = task.content ? task.content.split('\n').filter(line => line.trim()) : [];
-        const firstLine = contentLines[0] || 'Untitled Task';
+        const title = contentLines[0] || 'Untitled Task';
         const details = contentLines.slice(1).filter(l => l.trim());
         
         let status = 'Low Priority';
@@ -76,7 +76,7 @@ const processedTasks = tasks
             status = 'Medium Priority';
         }
 
-        const text = `${firstLine} ${task.description || ''}`.toLowerCase();
+        const text = `${title} ${task.description || ''}`.toLowerCase();
         let type = 'General';
         if (text.includes('tax') || text.includes('vat') || text.includes('payment')) type = 'Financial';
         if (text.includes('car') || text.includes('rover') || text.includes('beetle')) type = 'Vehicle';
@@ -85,17 +85,16 @@ const processedTasks = tasks
         if (text.includes('study') || text.includes('paper') || text.includes('file')) type = 'Admin';
 
         const ssmlPattern = getSSMLPattern({...task, daysUntilDue});
-        const ssmlText = ssmlPattern.replace('$TEXT', firstLine);
+        const pattern = ssmlPattern.replace('$TEXT', title);
 
         return {
-            docid: task.content,
-            pattern: ssmlText,
-            dueDate: task['Due Date'],
-            daysUntilDue,
+            title,
+            pattern,
+            due: `${task['Due Date']}${daysUntilDue !== null ? ` (${Math.abs(daysUntilDue)} days ${daysUntilDue < 0 ? 'overdue' : 'remaining'})` : ''}`,
             status,
-            isUrgent,
             type,
-            details
+            details,
+            isUrgent
         };
     })
     .sort((a, b) => {
@@ -106,32 +105,11 @@ const processedTasks = tasks
 const urgentTasks = processedTasks.filter(task => task.isUrgent);
 const regularTasks = processedTasks.filter(task => !task.isUrgent);
 
-const formatTasks = (taskList) => taskList
-    .map(task => {
-        const detailsText = task.details?.length ? 
-            `Details:\n${task.details.map(d => `- ${d}`).join('\n')}\n` : '';
-        
-        return `Task: ${task.docid}
-Pattern: ${task.pattern}
-Due: ${task.dueDate}${task.daysUntilDue !== null ? ` (${Math.abs(task.daysUntilDue)} days ${task.daysUntilDue < 0 ? 'overdue' : 'remaining'})` : ''}
-Status: ${task.status}
-Type: ${task.type}
-${detailsText}`;
-    }).join('\n---\n\n');
-
-const output = `Total Tasks: ${processedTasks.length}
-Urgent Tasks: ${urgentTasks.length}
-Regular Tasks: ${regularTasks.length}
-
-${urgentTasks.length ? '🚨 URGENT TASKS:\n\n' + formatTasks(urgentTasks) : ''}${regularTasks.length ? '\n📋 REGULAR TASKS:\n\n' + formatTasks(regularTasks) : ''}`;
-
-return [
-    {
-        text: output,
-        stats: {
-            total: processedTasks.length,
-            urgent: urgentTasks.length,
-            regular: regularTasks.length
-        }
-    }
-];
+return [{
+    stats: {
+        total: processedTasks.length,
+        urgent: urgentTasks.length,
+        regular: regularTasks.length
+    },
+    tasks: processedTasks.map(({ isUrgent, ...task }) => task) // Remove isUrgent from output
+}];
